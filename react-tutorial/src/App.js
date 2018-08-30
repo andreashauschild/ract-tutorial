@@ -8,7 +8,10 @@ import ReduxTester from "./ReduxTester/ReduxTester"
 import {connect} from 'react-redux'
 import {greeting1, greeting2, greeting3, textChange} from "./actions/testAction";
 import {updateCamera} from "./actions/cameraAction";
+import {updatePreview} from "./actions/previewAction";
 import WebsocketClient from './core/WebsocketClient'
+import PreviewList from "./Components/PreviewList/PreviewList";
+
 
 class App extends Component {
     websocketHandlerByte = () =>{
@@ -25,7 +28,7 @@ class App extends Component {
         //     let img = JSON.parse(event.data)
         //     document.getElementById("camImage").src = img.base64;
         // }
-        webSocketClient.onmessage= (event)=>{
+        webSocketClient.onMessage= (event)=>{
             var arrayBuffer = event.data;
             var reader = new FileReader();
             reader.onload = function (e) {
@@ -47,15 +50,36 @@ class App extends Component {
         })
 
         console.log("websocket clicked")
-        webSocketClient.onmessage= (event)=>{
+        webSocketClient.onMessage= (event)=>{
             let img = JSON.parse(event.data)
             this.props.destroyTodo.updateCam(event.data)
             document.getElementById("camImageJson").src = img.base64;
             webSocketClient.sendMessage("ready")
         }
 
+        webSocketClient.connect()
+    }
+
+    websocketHandlerData = () =>{
+        const webSocketClient = new WebsocketClient({
+            port: 8080,
+            schema:"ws",
+            host:"localhost",
+            path:"/ws/data"
+
+        })
+
+        console.log("websocket clicked")
+        webSocketClient.onMessage= (event)=>{
+            let data = JSON.parse(event.data)
+            this.props.actions.updatePreview(data.preview);
+        }
+        webSocketClient.onOpen = (event) =>{
+            webSocketClient.sendMessage("INIT")
+        }
 
         webSocketClient.connect()
+
     }
 
     render() {
@@ -70,9 +94,12 @@ class App extends Component {
 
         return (
             <div className="App">
+                <PreviewList/>
+
                 <CameraList cameras={this.props.data.cameras}/>
                 <button onClick={this.websocketHandlerByte}>Connect to Byte Websocket</button>
                 <button onClick={this.websocketHandlerJson}>Connect to JSON Websocket</button>
+                <button onClick={this.websocketHandlerData}>Connect to Data Websocket</button>
                 <div> Dynamic:{Math.floor(Math.random()*30)}</div>
                 <ReduxTester/>
                 {cams}
@@ -99,6 +126,9 @@ const mapDispatchToProps = (dispatch) => {
     // }
 
     return {
+        actions:{
+            updatePreview : (camera) => dispatch(updatePreview(camera))
+        },
         destroyTodo:
             {
                 g1: () => dispatch(greeting1())

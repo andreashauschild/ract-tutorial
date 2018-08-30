@@ -2,30 +2,31 @@
  * Created by Andreas on 08/04/2018.
  */
 "use strict";
+
 class WebsocketClient {
 
     init() {
         this._config = {
-            port : 8080
-            ,host: "localhost"
-            ,path: "ws/testEndpoint"
-            ,schema: "ws"
+            port: 8080
+            , host: "localhost"
+            , path: "ws/testEndpoint"
+            , schema: "ws"
         }
         this._websocket = undefined;
     }
 
     constructor(config) {
         this.init();
-        if(config.port!==undefined){
+        if (config.port !== undefined) {
             this._config.port = config.port;
         }
-        if(config.host!==undefined){
+        if (config.host !== undefined) {
             this._config.host = config.host;
         }
-        if(config.path!==undefined){
+        if (config.path !== undefined) {
             this._config.path = config.path;
         }
-        if(config.schema!==undefined){
+        if (config.schema !== undefined) {
             this._config.schema = config.schema;
         }
     }
@@ -40,31 +41,44 @@ class WebsocketClient {
 
         this._websocket = new WebSocket(url)
 
-        this._websocket.onopen = function (event) {
-            console.log("Connected to:" + url);
-            _self.streamCam();
+        this._websocket.onopen = (event) => {
+            this.onOpen(event);
 
         };
 
-        this._websocket.onerror = function (event) {
-            console.log("ERROR");
+        this._websocket.onerror = (event) => {
+            this.onError(event);
 
         };
 
-        this._websocket.onclose = function (event) {
-            console.log("CLOSE");
+        this._websocket.onclose = (event) => {
+            this.onClose(event);
 
         };
 
         this._websocket.onmessage = (event) => {
-            this.onmessage(event)
+            this.onMessage(event)
         }
     }
 
-    onmessage(event){
-        console.log("message received")
+
+    onError(event) {
+        console.log("onOpen", event);
     }
-    sendMessage(message){
+
+    onClose(event) {
+        console.log("onOpen", event);
+    }
+
+    onOpen(event) {
+        console.log("onOpen", event);
+    }
+
+    onMessage(event) {
+        console.log("onMessage", event);
+    }
+
+    sendMessage(message) {
         this._websocket.send(message)
     }
 
