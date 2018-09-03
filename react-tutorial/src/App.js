@@ -73,6 +73,7 @@ class App extends Component {
         webSocketClient.onMessage= (event)=>{
             let data = JSON.parse(event.data)
             this.props.actions.updatePreview(data.preview);
+            webSocketClient.sendMessage("ready");
         }
         webSocketClient.onOpen = (event) =>{
             webSocketClient.sendMessage("INIT")
